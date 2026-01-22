@@ -1,0 +1,82 @@
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+  background: #0b1220;
+}
+
+.sidebar {
+  width: 240px;
+  padding: 18px;
+  background: #0f172a;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.brand {
+  padding: 10px 6px;
+}
+
+.logo {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.smallText {
+  margin: 6px 0 0 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.navLink {
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.navLink:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.active {
+  background: rgba(79, 70, 229, 0.25);
+  border: 1px solid rgba(79, 70, 229, 0.5);
+  color: #fff;
+}
+
+.logoutBtn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fecaca;
+  font-weight: 600;
+}
+
+.logoutBtn:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.main {
+  flex: 1;
+  padding: 22px;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 190px;
+  }
+}
