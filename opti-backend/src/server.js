@@ -12,17 +12,24 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const HOST = "0.0.0.0";
 
-// Frontend URL (set in production)
+// Frontend URL (IMPORTANT)
+// Example: http://43.205.215.7:3000
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
 /* ===============================
    MIDDLEWARES
 ================================ */
 
-// CORS configuration
+/**
+ * ✅ CORS (FINAL, SAFE CONFIG)
+ * - Allows browser to reach backend
+ * - Prevents silent blocking
+ */
 app.use(
   cors({
-    origin: FRONTEND_URL || true, // allow all if not set (dev)
+    origin: FRONTEND_URL || "*", // allow all if not set
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
@@ -31,9 +38,11 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Simple request logger (PM2 friendly)
+// Request logger (PM2 friendly)
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log(
+    `[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`
+  );
   next();
 });
 
@@ -70,7 +79,7 @@ app.get("/api/health", (req, res) => {
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: `Route not found: ${req.method} ${req.url}`,
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
   });
 });
 
@@ -87,7 +96,7 @@ app.use((err, req, res, next) => {
 });
 
 /* ===============================
-   START SERVER (PRODUCTION SAFE)
+   START SERVER
 ================================ */
 app.listen(PORT, HOST, () => {
   console.log(`🚀 OPTI Backend running on port ${PORT}`);
