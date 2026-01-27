@@ -1,0 +1,601 @@
+.container {
+  min-height: 100vh;
+  height: 100vh;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}
+
+/* ================= HEADER ================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 10;
+}
+
+/* ================= OPTI BRANDING - TOP LEFT ================= */
+.brandingCorner {
+  flex-shrink: 0;
+}
+
+.brandName {
+  font-size: 3rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  background: linear-gradient(
+    135deg,
+    #d8dcff 0%,
+    #7c88ff 20%,
+    #5865f2 40%,
+    #7c88ff 60%,
+    #d8dcff 80%,
+    #7c88ff 100%
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientMove 8s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 50% 100%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 0%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ================= BACK BUTTON - TOP RIGHT ================= */
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.backButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.backButton:hover {
+  background: rgba(124, 136, 255, 0.2);
+  border-color: #7c88ff;
+  transform: translateX(-3px);
+}
+
+/* ================= CONTENT ================= */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.card {
+  width: 100%;
+  background: #fff;
+  border-radius: 2rem;
+  padding: 3rem;
+  box-shadow: 0 20px 60px rgba(124, 136, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #7c88ff 0%, #5865f2 100%);
+}
+
+/* ================= ICON ================= */
+.iconContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.iconCircle {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #7c88ff, #5865f2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(124, 136, 255, 0.3);
+}
+
+.iconCircle svg {
+  width: 40px;
+  height: 40px;
+}
+
+/* ================= TYPOGRAPHY ================= */
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  text-align: center;
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+}
+
+/* ================= FORM ================= */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin-left: 0.25rem;
+}
+
+.required {
+  color: #f44336;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  width: 20px;
+  height: 20px;
+  color: #999;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input {
+  width: 100%;
+  padding: 0.95rem 1rem 0.95rem 3rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s ease;
+  background: #fff;
+  color: #333;
+  font-family: inherit;
+}
+
+.input::placeholder {
+  color: #aaa;
+}
+
+.input:focus {
+  border-color: #7c88ff;
+  box-shadow: 0 0 0 4px rgba(124, 136, 255, 0.1);
+}
+
+.input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #999;
+  margin-left: 0.25rem;
+}
+
+.errorHint {
+  font-size: 0.8rem;
+  color: #f44336;
+  margin-left: 0.25rem;
+  font-weight: 500;
+}
+
+.successHint {
+  font-size: 0.8rem;
+  color: #4caf50;
+  margin-left: 0.25rem;
+  font-weight: 500;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.togglePassword svg {
+  width: 20px;
+  height: 20px;
+}
+
+.togglePassword:hover:not(:disabled) {
+  color: #7c88ff;
+}
+
+.togglePassword:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ================= PASSWORD STRENGTH ================= */
+.strengthContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.strengthBar {
+  flex: 1;
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.strengthFill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.strengthLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* ================= MESSAGES ================= */
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 0.75rem;
+  color: #d32f2f;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: shake 0.4s ease;
+}
+
+.errorMessage svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* ================= BUTTONS ================= */
+.primaryButton {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7c88ff, #5865f2);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(124, 136, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+}
+
+.primaryButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(124, 136, 255, 0.4);
+}
+
+.primaryButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ================= LOGIN LINK ================= */
+.loginLink {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  color: #7c88ff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  font-size: 0.9rem;
+  padding: 0;
+  font-family: inherit;
+}
+
+.linkButton::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #7c88ff;
+  transition: width 0.3s ease;
+}
+
+.linkButton:hover:not(:disabled) {
+  color: #5865f2;
+}
+
+.linkButton:hover:not(:disabled)::after {
+  width: 100%;
+}
+
+.linkButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ================= SECURITY NOTICE ================= */
+.securityNotice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.securityNotice svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: #7c88ff;
+}
+
+.securityNotice p {
+  margin: 0;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+    overflow-y: auto;
+    height: auto;
+  }
+
+  .header {
+    margin-bottom: 1.5rem;
+  }
+
+  .brandName {
+    font-size: 2.5rem;
+  }
+
+  .backButton {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .backButton svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .card {
+    padding: 2.5rem 2rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .securityNotice {
+    padding: 0.875rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .securityNotice svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header {
+    margin-bottom: 1rem;
+  }
+
+  .brandName {
+    font-size: 2rem;
+  }
+
+  .backButton {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8rem;
+  }
+
+  .backButton span {
+    display: none;
+  }
+
+  .backButton svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .card {
+    padding: 2rem 1.5rem;
+    border-radius: 1.5rem;
+  }
+
+  .iconCircle {
+    width: 70px;
+    height: 70px;
+  }
+
+  .iconCircle svg {
+    width: 35px;
+    height: 35px;
+  }
+
+  .title {
+    font-size: 1.35rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .input {
+    padding: 0.85rem 0.875rem 0.85rem 2.75rem;
+    font-size: 0.9rem;
+  }
+
+  .primaryButton {
+    padding: 0.95rem;
+    font-size: 0.95rem;
+  }
+
+  .securityNotice {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.75rem;
+  }
+
+  .securityNotice svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* ================= REDUCED MOTION ================= */
+@media (prefers-reduced-motion: reduce) {
+  .brandName {
+    animation: none;
+    background: linear-gradient(135deg, #d8dcff 0%, #7c88ff 50%, #5865f2 100%);
+    background-size: 100% 100%;
+  }
+}
