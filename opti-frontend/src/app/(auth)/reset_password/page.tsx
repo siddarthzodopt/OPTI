@@ -1,276 +1,244 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./style.module.css";
 
+type FormData = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
+type FormErrors = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
 export default function ResetPasswordPage() {
   const router = useRouter();
+
   const [userEmail, setUserEmail] = useState("");
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<FormErrors>({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
+  /* ===============================
+     INITIAL CHECK
+  ================================ */
   useEffect(() => {
-    // Check if user needs to reset password
     const email = sessionStorage.getItem("pendingPasswordReset");
     if (!email) {
-      // If no pending reset, redirect to login
-      router.push("/opti-chat");
+      router.replace("/login");
       return;
     }
     setUserEmail(email);
   }, [router]);
 
+  /* ===============================
+     PASSWORD VALIDATION
+  ================================ */
   const validatePassword = (password: string): string[] => {
-    const errors: string[] = [];
-    
-    if (password.length < 8) {
-      errors.push("Password must be at least 8 characters long");
+    const issues: string[] = [];
+
+    if (password.length < 8) issues.push("At least 8 characters");
+    if (!/[A-Z]/.test(password)) issues.push("One uppercase letter");
+    if (!/[a-z]/.test(password)) issues.push("One lowercase letter");
+    if (!/[0-9]/.test(password)) issues.push("One number");
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+      issues.push("One special character");
     }
-    if (!/[A-Z]/.test(password)) {
-      errors.push("Password must contain at least one uppercase letter");
-    }
-    if (!/[a-z]/.test(password)) {
-      errors.push("Password must contain at least one lowercase letter");
-    }
-    if (!/[0-9]/.test(password)) {
-      errors.push("Password must contain at least one number");
-    }
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      errors.push("Password must contain at least one special character");
-    }
-    
-    return errors;
+
+    return issues;
   };
 
+  const passwordStrength = useMemo(() => {
+    if (!formData.newPassword) return { label: "", color: "" };
+
+    const issues = validatePassword(formData.newPassword);
+    if (issues.length === 0) return { label: "Strong", color: "#10b981" };
+    if (issues.length <= 2) return { label: "Medium", color: "#f59e0b" };
+    return { label: "Weak", color: "#ef4444" };
+  }, [formData.newPassword]);
+
+  /* ===============================
+     FORM SUBMIT
+  ================================ */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Reset errors
-    setErrors({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+    setErrors({ currentPassword: "", newPassword: "", confirmPassword: "" });
 
-    // Validate current password
-    const credentials = JSON.parse(localStorage.getItem("userCredentials") || "{}");
-    const userCreds = credentials[userEmail];
+    const storedCreds = JSON.parse(
+      localStorage.getItem("userCredentials") || "{}"
+    );
+    const userCreds = storedCreds[userEmail];
 
     if (!userCreds) {
-      setErrors((prev) => ({ ...prev, currentPassword: "User not found" }));
+      setErrors((p) => ({ ...p, currentPassword: "User not found" }));
       return;
     }
 
     if (formData.currentPassword !== userCreds.password) {
-      setErrors((prev) => ({ ...prev, currentPassword: "Current password is incorrect" }));
-      return;
-    }
-
-    // Validate new password
-    const passwordErrors = validatePassword(formData.newPassword);
-    if (passwordErrors.length > 0) {
-      setErrors((prev) => ({ ...prev, newPassword: passwordErrors.join(". ") }));
-      return;
-    }
-
-    // Check if new password is same as current
-    if (formData.newPassword === formData.currentPassword) {
-      setErrors((prev) => ({
-        ...prev,
-        newPassword: "New password must be different from current password",
+      setErrors((p) => ({
+        ...p,
+        currentPassword: "Current password is incorrect",
       }));
       return;
     }
 
-    // Validate password confirmation
-    if (formData.newPassword !== formData.confirmPassword) {
-      setErrors((prev) => ({ ...prev, confirmPassword: "Passwords do not match" }));
+    const passwordIssues = validatePassword(formData.newPassword);
+    if (passwordIssues.length > 0) {
+      setErrors((p) => ({
+        ...p,
+        newPassword: passwordIssues.join(", "),
+      }));
       return;
     }
 
-    // Update password
+    if (formData.currentPassword === formData.newPassword) {
+      setErrors((p) => ({
+        ...p,
+        newPassword: "New password must be different",
+      }));
+      return;
+    }
+
+    if (formData.newPassword !== formData.confirmPassword) {
+      setErrors((p) => ({
+        ...p,
+        confirmPassword: "Passwords do not match",
+      }));
+      return;
+    }
+
+    /* ===============================
+       SIMULATED UPDATE (FRONTEND)
+    ================================ */
     setIsLoading(true);
-    
+
     setTimeout(() => {
-      credentials[userEmail] = {
+      storedCreds[userEmail] = {
         password: formData.newPassword,
         mustChangePassword: false,
       };
-      localStorage.setItem("userCredentials", JSON.stringify(credentials));
+      localStorage.setItem("userCredentials", JSON.stringify(storedCreds));
 
-      // Update user's last login
       const users = JSON.parse(localStorage.getItem("companyUsers") || "[]");
-      const updatedUsers = users.map((user: any) => {
-        if (user.email === userEmail) {
-          return { ...user, lastLogin: new Date().toISOString() };
-        }
-        return user;
-      });
-      localStorage.setItem("companyUsers", JSON.stringify(updatedUsers));
+      localStorage.setItem(
+        "companyUsers",
+        JSON.stringify(
+          users.map((u: any) =>
+            u.email === userEmail
+              ? { ...u, lastLogin: new Date().toISOString() }
+              : u
+          )
+        )
+      );
 
-      // Clear pending reset flag
       sessionStorage.removeItem("pendingPasswordReset");
-      
-      // Set logged in user
       sessionStorage.setItem("loggedInUser", userEmail);
 
       setIsLoading(false);
-      
-      // Show success message and redirect
-      alert("Password changed successfully! You can now access OPTI Chat.");
-      router.push("/opti-chat");
-    }, 1000);
+      alert("Password updated successfully");
+      router.replace("/opti-chat");
+    }, 800);
   };
 
   const handleCancel = () => {
-    // Clear session and return to login
     sessionStorage.removeItem("pendingPasswordReset");
-    router.push("/login");
+    router.replace("/login");
   };
 
-  const getPasswordStrength = (password: string): { strength: string; color: string } => {
-    if (password.length === 0) return { strength: "", color: "" };
-    
-    const errors = validatePassword(password);
-    
-    if (errors.length === 0) {
-      return { strength: "Strong", color: "#10b981" };
-    } else if (errors.length <= 2) {
-      return { strength: "Medium", color: "#f59e0b" };
-    } else {
-      return { strength: "Weak", color: "#ef4444" };
-    }
-  };
-
-  const passwordStrength = getPasswordStrength(formData.newPassword);
-
+  /* ===============================
+     UI
+  ================================ */
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <div className={styles.header}>
-          <div className={styles.iconWrapper}>
-            <span className={styles.icon}>🔐</span>
-          </div>
-          <h1 className={styles.title}>Reset Your Password</h1>
+        <header className={styles.header}>
+          <span className={styles.icon}>🔐</span>
+          <h1 className={styles.title}>Reset Password</h1>
           <p className={styles.subtitle}>
-            For security reasons, you must change your temporary password before accessing your account.
+            You must change your temporary password before continuing.
           </p>
-        </div>
+        </header>
 
         <form onSubmit={handleSubmit} className={styles.form}>
+          {/* Email */}
           <div className={styles.formGroup}>
-            <label className={styles.label}>Email</label>
-            <input
-              type="email"
-              className={styles.input}
-              value={userEmail}
-              disabled
-            />
+            <label>Email</label>
+            <input type="email" value={userEmail} disabled />
           </div>
 
+          {/* Current Password */}
           <div className={styles.formGroup}>
-            <label className={styles.label}>Current Password *</label>
+            <label>Current Password *</label>
             <input
               type="password"
-              className={`${styles.input} ${errors.currentPassword ? styles.inputError : ""}`}
-              placeholder="Enter your temporary password"
               value={formData.currentPassword}
               onChange={(e) =>
                 setFormData({ ...formData, currentPassword: e.target.value })
               }
-              required
             />
             {errors.currentPassword && (
               <p className={styles.errorText}>{errors.currentPassword}</p>
             )}
           </div>
 
+          {/* New Password */}
           <div className={styles.formGroup}>
-            <label className={styles.label}>New Password *</label>
+            <label>New Password *</label>
             <input
               type="password"
-              className={`${styles.input} ${errors.newPassword ? styles.inputError : ""}`}
-              placeholder="Enter your new password"
               value={formData.newPassword}
               onChange={(e) =>
                 setFormData({ ...formData, newPassword: e.target.value })
               }
-              required
             />
-            {formData.newPassword && (
-              <div className={styles.strengthIndicator}>
-                <span style={{ color: passwordStrength.color }}>
-                  {passwordStrength.strength}
-                </span>
-              </div>
+            {passwordStrength.label && (
+              <span style={{ color: passwordStrength.color }}>
+                {passwordStrength.label}
+              </span>
             )}
             {errors.newPassword && (
               <p className={styles.errorText}>{errors.newPassword}</p>
             )}
           </div>
 
+          {/* Confirm Password */}
           <div className={styles.formGroup}>
-            <label className={styles.label}>Confirm New Password *</label>
+            <label>Confirm New Password *</label>
             <input
               type="password"
-              className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ""}`}
-              placeholder="Re-enter your new password"
               value={formData.confirmPassword}
               onChange={(e) =>
                 setFormData({ ...formData, confirmPassword: e.target.value })
               }
-              required
             />
             {errors.confirmPassword && (
               <p className={styles.errorText}>{errors.confirmPassword}</p>
             )}
           </div>
 
-          <div className={styles.requirements}>
-            <p className={styles.requirementsTitle}>Password Requirements:</p>
-            <ul className={styles.requirementsList}>
-              <li className={formData.newPassword.length >= 8 ? styles.valid : ""}>
-                At least 8 characters
-              </li>
-              <li className={/[A-Z]/.test(formData.newPassword) ? styles.valid : ""}>
-                One uppercase letter
-              </li>
-              <li className={/[a-z]/.test(formData.newPassword) ? styles.valid : ""}>
-                One lowercase letter
-              </li>
-              <li className={/[0-9]/.test(formData.newPassword) ? styles.valid : ""}>
-                One number
-              </li>
-              <li className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.newPassword) ? styles.valid : ""}>
-                One special character (!@#$%^&*...)
-              </li>
-            </ul>
-          </div>
-
+          {/* Buttons */}
           <div className={styles.buttonGroup}>
             <button
               type="button"
-              className={styles.cancelBtn}
               onClick={handleCancel}
               disabled={isLoading}
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className={styles.submitBtn}
-              disabled={isLoading}
-            >
+            <button type="submit" disabled={isLoading}>
               {isLoading ? "Updating..." : "Reset Password"}
             </button>
           </div>
