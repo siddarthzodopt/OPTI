@@ -10,26 +10,30 @@ const app = express();
    CONFIG
 ================================ */
 const PORT = process.env.PORT || 5000;
+const HOST = "0.0.0.0";
 
-// ✅ Frontend URL (optional). If not set, allow all (dev)
-const FRONTEND_URL = process.env.FRONTEND_URL || null;
+// Frontend URL (set in production)
+const FRONTEND_URL = process.env.FRONTEND_URL;
 
 /* ===============================
    MIDDLEWARES
 ================================ */
+
+// CORS configuration
 app.use(
   cors({
-    origin: FRONTEND_URL ? [FRONTEND_URL] : true,
+    origin: FRONTEND_URL || true, // allow all if not set (dev)
     credentials: true,
   })
 );
 
+// Body parsers
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Simple request logger
+// Simple request logger (PM2 friendly)
 app.use((req, res, next) => {
-  console.log(`➡️ ${req.method} ${req.url}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
@@ -38,7 +42,7 @@ app.use((req, res, next) => {
 ================================ */
 const chatRoutes = require("./routes/chat");
 const s3ExcelRoutes = require("./routes/s3Excel");
-const mailRoutes = require("./routes/mail"); // ✅ add this if you created mail routes
+const mailRoutes = require("./routes/mail");
 
 app.use("/api/chat", chatRoutes);
 app.use("/api/s3", s3ExcelRoutes);
@@ -55,7 +59,8 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Backend OK ✅",
-    time: new Date().toISOString(),
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -82,8 +87,8 @@ app.use((err, req, res, next) => {
 });
 
 /* ===============================
-   START SERVER
+   START SERVER (PRODUCTION SAFE)
 ================================ */
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 OPTI Backend running on port ${PORT}`);
 });
