@@ -110,16 +110,18 @@
   gap: 1.5rem;
   position: relative;
   z-index: 1;
-  max-width: 520px;
+  max-width: 680px;
   margin: 0 auto;
   width: 100%;
+  padding: 0 1rem;
 }
 
 .card {
   width: 100%;
+  max-width: 100%;
   background: #fff;
   border-radius: 2rem;
-  padding: 3rem;
+  padding: 3.5rem 4rem;
   box-shadow: 0 20px 60px rgba(124, 136, 255, 0.15);
   position: relative;
   overflow: hidden;
@@ -471,11 +473,34 @@
 
 /* ================= RESPONSIVE ================= */
 
+@media (min-width: 1200px) {
+  .content {
+    max-width: 750px;
+  }
+
+  .card {
+    padding: 4rem 5rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1.5rem;
     overflow-y: auto;
     height: auto;
+  }
+
+  .content {
+    max-width: 600px;
+    padding: 0 0.75rem;
   }
 
   .header {
@@ -497,7 +522,7 @@
   }
 
   .card {
-    padding: 2.5rem 2rem;
+    padding: 3rem 2.5rem;
   }
 
   .title {
@@ -522,6 +547,11 @@
 @media (max-width: 480px) {
   .container {
     padding: 1rem;
+  }
+
+  .content {
+    max-width: 100%;
+    padding: 0 0.5rem;
   }
 
   .header {
