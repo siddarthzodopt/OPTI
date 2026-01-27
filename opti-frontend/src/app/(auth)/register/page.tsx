@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./admin-register.module.css";
+import styles from "./style.module.css";
 
 export default function AdminRegisterPage() {
   const router = useRouter();
