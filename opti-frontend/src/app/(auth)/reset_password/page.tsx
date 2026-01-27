@@ -24,7 +24,7 @@ export default function ResetPasswordPage() {
     const email = sessionStorage.getItem("pendingPasswordReset");
     if (!email) {
       // If no pending reset, redirect to login
-      router.push("/login");
+      router.push("/opti-chat");
       return;
     }
     setUserEmail(email);
