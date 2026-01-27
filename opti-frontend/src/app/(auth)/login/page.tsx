@@ -33,7 +33,7 @@ export default function LoginPage() {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // On success
-      router.push("/subscriptions");
+      router.push("/reset_password");
     } catch (err) {
       setError("Invalid username or password");
     } finally {
