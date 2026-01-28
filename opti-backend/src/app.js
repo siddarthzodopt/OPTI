@@ -1,161 +1,101 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
 
 /* ===============================
    IMPORT MIDDLEWARE
 ================================ */
-const errorHandler = require('./src/middleware/errorHandler');
+const errorHandler = require("./src/middleware/errorHandler");
 
 /* ===============================
    IMPORT ROUTES
 ================================ */
-// Authentication & User Management Routes
-const authRoutes = require('./src/routes/authRoutes');
-const adminRoutes = require('./src/routes/adminRoutes');
-const userRoutes = require('./src/routes/userRoutes');
+// Authentication & User Management
+const authRoutes = require("./src/routes/auth.routes");
+const adminRoutes = require("./src/routes/adminRoutes");
+const userRoutes = require("./src/routes/userRoutes");
 
-// Existing Application Routes
-const chatRoutes = require('./routes/chat');
-const s3ExcelRoutes = require('./routes/s3Excel');
-const mailRoutes = require('./routes/mail');
+// Application Routes
+const chatRoutes = require("./src/routes/chat");
+const s3ExcelRoutes = require("./src/routes/s3Excel");
+const mailRoutes = require("./src/routes/mail");
 
 /* ===============================
-   EXPRESS APP INITIALIZATION
+   APP INITIALIZATION
 ================================ */
 const app = express();
 
 /* ===============================
-   CONFIGURATION
+   CONFIG
 ================================ */
-const FRONTEND_URL = process.env.FRONTEND_URL || '*';
-const NODE_ENV = process.env.NODE_ENV || 'development';
+const PORT = process.env.PORT || 5000;
+const HOST = "0.0.0.0";
+const NODE_ENV = process.env.NODE_ENV || "development";
+const FRONTEND_URL = process.env.FRONTEND_URL || "*";
 
 /* ===============================
-   MIDDLEWARE SETUP
+   MIDDLEWARES
 ================================ */
 
-/**
- * CORS Configuration
- * Allows frontend to communicate with backend
- */
+// CORS
 app.use(
   cors({
-    origin: FRONTEND_URL,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: FRONTEND_URL === "*" ? true : FRONTEND_URL,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-/**
- * Body Parsers
- * Parse JSON and URL-encoded data
- */
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parsing
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-/**
- * Request Logger
- * Logs all incoming requests with timestamp
- */
-app.use((req, res, next) => {
-  const timestamp = new Date().toISOString();
-  const method = req.method.padEnd(7);
-  console.log(`[${timestamp}] ${method} ${req.originalUrl}`);
+// Request logger
+app.use((req, _res, next) => {
+  console.log(
+    `[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`
+  );
   next();
 });
 
 /* ===============================
-   HEALTH CHECK ROUTES
+   HEALTH & INFO
 ================================ */
 
-/**
- * Root route
- * Quick check if server is running
- */
-app.get('/', (req, res) => {
-  res.status(200).json({
+app.get("/", (_req, res) => {
+  res.json({
     success: true,
-    message: '✅ OPTI Backend is running',
-    version: '1.0.0',
+    message: "✅ OPTI Backend is running",
+    version: "1.0.0",
     environment: NODE_ENV,
     timestamp: new Date().toISOString(),
   });
 });
 
-/**
- * Detailed health check
- * Returns server status and configuration
- */
-app.get('/health', (req, res) => {
-  res.status(200).json({
+app.get("/health", (_req, res) => {
+  res.json({
     success: true,
-    message: 'Backend OK ✅',
-    server: {
-      uptime: Math.floor(process.uptime()),
-      environment: NODE_ENV,
-      nodeVersion: process.version,
-      platform: process.platform,
-    },
-    services: {
-      database: 'MySQL (AWS)',
-      secrets: 'AWS Secrets Manager',
-      email: 'Nodemailer',
-    },
-    timestamp: new Date().toISOString(),
+    message: "Backend OK ✅",
+    uptime: Math.floor(process.uptime()),
+    environment: NODE_ENV,
+    nodeVersion: process.version,
+    platform: process.platform,
   });
 });
 
-/**
- * API info route
- * Lists all available API endpoints
- */
-app.get('/api', (req, res) => {
-  res.status(200).json({
+app.get("/api", (_req, res) => {
+  res.json({
     success: true,
-    message: 'OPTI API v1.0.0',
-    endpoints: {
-      authentication: {
-        adminLogin: 'POST /api/auth/admin/login',
-        userLogin: 'POST /api/auth/user/login',
-        changePassword: 'POST /api/auth/change-password',
-        forgotPassword: 'POST /api/auth/forgot-password',
-        verifyOTP: 'POST /api/auth/verify-otp',
-        resetPassword: 'POST /api/auth/reset-password',
-        logout: 'POST /api/auth/logout',
-      },
-      admin: {
-        register: 'POST /api/admin/register',
-        profile: 'GET /api/admin/profile',
-        updateProfile: 'PUT /api/admin/profile',
-        companyPlan: 'GET /api/admin/company-plan',
-        updatePlan: 'PUT /api/admin/company-plan',
-      },
-      users: {
-        create: 'POST /api/users',
-        list: 'GET /api/users',
-        get: 'GET /api/users/:id',
-        update: 'PUT /api/users/:id',
-        delete: 'DELETE /api/users/:id',
-        toggleStatus: 'PATCH /api/users/:id/toggle-status',
-        resetPassword: 'POST /api/users/:id/reset-password',
-        myProfile: 'GET /api/users/profile/me',
-        updateMyProfile: 'PUT /api/users/profile/me',
-      },
-      chat: {
-        endpoint: '/api/chat',
-        description: 'Chat and AI interaction endpoints',
-      },
-      s3: {
-        endpoint: '/api/s3',
-        description: 'S3 and Excel file operations',
-      },
-      mail: {
-        endpoint: '/api/mail',
-        description: 'Email sending operations',
-      },
-    },
-    documentation: 'See README.md for detailed API documentation',
+    message: "OPTI API v1",
+    routes: [
+      "/api/auth",
+      "/api/admin",
+      "/api/users",
+      "/api/chat",
+      "/api/s3",
+      "/api/mail",
+    ],
   });
 });
 
@@ -163,67 +103,35 @@ app.get('/api', (req, res) => {
    API ROUTES
 ================================ */
 
-/**
- * Authentication & Authorization Routes
- * Handles login, logout, password management
- */
-app.use('/api/auth', authRoutes);
-
-/**
- * Admin Management Routes
- * Handles admin registration and profile management
- */
-app.use('/api/admin', adminRoutes);
-
-/**
- * User Management Routes
- * Handles CRUD operations for users
- */
-app.use('/api/users', userRoutes);
-
-/**
- * Chat Routes
- * Handles chat and AI interactions
- */
-app.use('/api/chat', chatRoutes);
-
-/**
- * S3 Excel Routes
- * Handles S3 storage and Excel file operations
- */
-app.use('/api/s3', s3ExcelRoutes);
-
-/**
- * Mail Routes
- * Handles email sending operations
- */
-app.use('/api/mail', mailRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/s3", s3ExcelRoutes);
+app.use("/api/mail", mailRoutes);
 
 /* ===============================
-   404 NOT FOUND HANDLER
+   404 HANDLER
 ================================ */
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: `Route not found: ${req.method} ${req.originalUrl}`,
-    suggestion: 'Check GET /api for available endpoints',
-    availableRoutes: [
-      '/api/auth',
-      '/api/admin',
-      '/api/users',
-      '/api/chat',
-      '/api/s3',
-      '/api/mail',
-    ],
+    hint: "Check GET /api for available endpoints",
   });
 });
 
 /* ===============================
-   GLOBAL ERROR HANDLER
+   ERROR HANDLER
 ================================ */
+
 app.use(errorHandler);
 
 /* ===============================
-   EXPORT APP
+   START SERVER
 ================================ */
-module.exports = app;
+
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 OPTI Backend running on ${HOST}:${PORT}`);
+});
