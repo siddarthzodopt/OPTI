@@ -5,11 +5,15 @@ import { useRouter } from "next/navigation";
 import styles from "./style.module.css";
 
 type Step = "email" | "otp" | "password" | "success";
+type UserType = "user" | "admin";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://3.7.98.1:5000/api";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
 
   const [step, setStep] = useState<Step>("email");
+  const [userType, setUserType] = useState<UserType>("user");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -48,15 +52,26 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      // Your API call here to send OTP
-      // const response = await fetch('/api/forgot-password', { ... });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          userType: userType,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to send OTP");
+      }
+
       setStep("otp");
-    } catch (err) {
-      setError("Failed to send OTP. Please try again.");
+    } catch (err: any) {
+      setError(err.message || "Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -79,15 +94,27 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      // Your API call here to verify OTP
-      // const response = await fetch('/api/verify-otp', { ... });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      const response = await fetch(`${API_URL}/auth/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          otp: otp.trim(),
+          userType: userType,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Invalid OTP");
+      }
+
       setStep("password");
-    } catch (err) {
-      setError("Invalid OTP. Please try again.");
+    } catch (err: any) {
+      setError(err.message || "Invalid OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -106,6 +133,17 @@ export default function ForgotPasswordPage() {
       return;
     }
 
+    // Password strength validation
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasNumber = /\d/.test(newPassword);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+      setError("Password must contain uppercase, lowercase, number, and special character");
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -115,15 +153,28 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      // Your API call here to reset password
-      // const response = await fetch('/api/reset-password', { ... });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      const response = await fetch(`${API_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          newPassword: newPassword,
+          confirmPassword: confirmPassword,
+          userType: userType,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to reset password");
+      }
+
       setStep("success");
-    } catch (err) {
-      setError("Failed to reset password. Please try again.");
+    } catch (err: any) {
+      setError(err.message || "Failed to reset password. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -134,14 +185,27 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      // Your API call here to resend OTP
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Show success message
-      setError("OTP has been resent to your email");
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          userType: userType,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to resend OTP");
+      }
+
+      setError("✓ OTP has been resent to your email");
       setTimeout(() => setError(""), 3000);
-    } catch (err) {
-      setError("Failed to resend OTP. Please try again.");
+    } catch (err: any) {
+      setError(err.message || "Failed to resend OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -207,6 +271,24 @@ export default function ForgotPasswordPage() {
               </p>
 
               <form onSubmit={handleEmailSubmit} className={styles.form}>
+                {/* User Type Selection */}
+                <div className={styles.userTypeToggle}>
+                  <button
+                    type="button"
+                    className={`${styles.toggleButton} ${userType === "user" ? styles.toggleButtonActive : ""}`}
+                    onClick={() => setUserType("user")}
+                  >
+                    User Account
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.toggleButton} ${userType === "admin" ? styles.toggleButtonActive : ""}`}
+                    onClick={() => setUserType("admin")}
+                  >
+                    Admin Account
+                  </button>
+                </div>
+
                 <div className={styles.inputGroup}>
                   <label htmlFor="email" className={styles.label}>
                     Email Address <span className={styles.required}>*</span>
@@ -225,6 +307,7 @@ export default function ForgotPasswordPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       disabled={loading}
                       autoComplete="email"
+                      required
                     />
                   </div>
                 </div>
@@ -272,6 +355,13 @@ export default function ForgotPasswordPage() {
               <p className={styles.subtitle}>
                 We've sent a 6-digit code to <strong>{email}</strong>
               </p>
+              <p className={styles.otpExpiry}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                OTP expires in 10 minutes
+              </p>
 
               <form onSubmit={handleOtpSubmit} className={styles.form}>
                 <div className={styles.inputGroup}>
@@ -293,14 +383,15 @@ export default function ForgotPasswordPage() {
                       disabled={loading}
                       maxLength={6}
                       autoComplete="off"
+                      required
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <div className={error.includes("resent") ? styles.successMessage : styles.errorMessage}>
+                  <div className={error.includes("✓") ? styles.successMessage : styles.errorMessage}>
                     <svg viewBox="0 0 24 24" fill="currentColor">
-                      {error.includes("resent") ? (
+                      {error.includes("✓") ? (
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                       ) : (
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
@@ -375,6 +466,7 @@ export default function ForgotPasswordPage() {
                       onChange={(e) => setNewPassword(e.target.value)}
                       disabled={loading}
                       autoComplete="new-password"
+                      required
                     />
                     <button
                       type="button"
@@ -383,20 +475,12 @@ export default function ForgotPasswordPage() {
                       disabled={loading}
                       aria-label={showNewPassword ? "Hide password" : "Show password"}
                     >
-                      {showNewPassword ? (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                          <line x1="1" y1="1" x2="23" y2="23"/>
-                        </svg>
-                      ) : (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                          <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                      )}
+                      {showNewPassword ? "🙈" : "👁️"}
                     </button>
                   </div>
-                  <small className={styles.hint}>Minimum 8 characters</small>
+                  <small className={styles.hint}>
+                    Must be 8+ characters with uppercase, lowercase, number & special character
+                  </small>
                 </div>
 
                 <div className={styles.inputGroup}>
@@ -417,6 +501,7 @@ export default function ForgotPasswordPage() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       disabled={loading}
                       autoComplete="new-password"
+                      required
                     />
                     <button
                       type="button"
@@ -425,17 +510,7 @@ export default function ForgotPasswordPage() {
                       disabled={loading}
                       aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                     >
-                      {showConfirmPassword ? (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                          <line x1="1" y1="1" x2="23" y2="23"/>
-                        </svg>
-                      ) : (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                          <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                      )}
+                      {showConfirmPassword ? "🙈" : "👁️"}
                     </button>
                   </div>
                 </div>
