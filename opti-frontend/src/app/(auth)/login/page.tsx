@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./style.module.css";
 
+// API Configuration
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://3.7.98.1:5000/api";
+
 export default function LoginPage() {
   const router = useRouter();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -17,8 +20,16 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!username.trim() || !password) {
-      setError("Please enter both username and password");
+    // Validation
+    if (!email.trim() || !password) {
+      setError("Please enter both email and password");
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
       return;
     }
 
@@ -26,16 +37,45 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Your login API call here
-      // const response = await fetch('/api/login', { ... });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // On success
-      router.push("/reset_password");
-    } catch (err) {
-      setError("Invalid username or password");
+      // Call backend login API
+      const response = await fetch(`${API_URL}/auth/user/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      // Store tokens in localStorage
+      if (data.data?.token) {
+        localStorage.setItem("opti_auth_token", data.data.token);
+      }
+      if (data.data?.refreshToken) {
+        localStorage.setItem("opti_refresh_token", data.data.refreshToken);
+      }
+      if (data.data?.user) {
+        localStorage.setItem("opti_user", JSON.stringify(data.data.user));
+      }
+
+      // Check if user must change password
+      if (data.data?.mustChangePassword) {
+        // Redirect to password change page
+        router.push("/reset_password");
+      } else {
+        // Redirect to dashboard/chat
+        router.push("/opti-chat");
+      }
+    } catch (err: any) {
+      setError(err.message || "Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -105,23 +145,24 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className={styles.form}>
             <div className={styles.inputGroup}>
-              <label htmlFor="username" className={styles.label}>
-                Username
+              <label htmlFor="email" className={styles.label}>
+                Email Address
               </label>
               <div className={styles.inputWrapper}>
                 <svg className={styles.inputIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
                 </svg>
                 <input
-                  type="text"
-                  id="username"
+                  type="email"
+                  id="email"
                   className={styles.input}
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
-                  autoComplete="username"
+                  autoComplete="email"
+                  required
                 />
               </div>
             </div>
@@ -144,6 +185,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
                   autoComplete="current-password"
+                  required
                 />
                 <button
                   type="button"
@@ -196,8 +238,8 @@ export default function LoginPage() {
                 Forgot Password?
               </Link>
               <span className={styles.separator}>|</span>
-              <Link href="/register" className={styles.link}>
-                New Registration
+              <Link href="/admin" className={styles.link}>
+                Admin Login
               </Link>
             </div>
           </form>
