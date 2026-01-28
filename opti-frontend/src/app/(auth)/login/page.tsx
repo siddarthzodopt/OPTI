@@ -72,7 +72,7 @@ export default function LoginPage() {
 
       // Redirect based on user type
       if (loginType === "admin") {
-        router.push("/settings"); // Admin dashboard
+        router.push("/admin"); // Admin dashboard
       } else {
         // Check if user must change password
         if (data.data?.mustChangePassword) {
