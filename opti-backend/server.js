@@ -6,7 +6,7 @@ const app = require("./src/app");
 const { connectDB } = require("./src/config/database");
 
 /* ===============================
-   CONFIG
+   CONFIGURATION
 ================================ */
 const PORT = Number(process.env.PORT) || 5000;
 const HOST = process.env.HOST || "0.0.0.0";
@@ -22,11 +22,11 @@ let isShuttingDown = false;
    GLOBAL ERROR HANDLERS
 ================================ */
 
-// Synchronous errors (very rare)
+// Synchronous errors
 process.on("uncaughtException", (err) => {
   console.error("💥 UNCAUGHT EXCEPTION");
   console.error(err.stack || err);
-  process.exit(1); // must exit immediately
+  process.exit(1); // Exit code must be a number
 });
 
 // Async promise errors
@@ -57,19 +57,22 @@ async function startServer() {
    GRACEFUL SHUTDOWN
 ================================ */
 function gracefulShutdown(exitCode = 0) {
+  // Ensure exitCode is a number
+  const numericExitCode = typeof exitCode === 'number' ? exitCode : 0;
+  
   if (isShuttingDown) return;
   isShuttingDown = true;
 
   console.log("👋 Graceful shutdown initiated...");
 
   if (!server) {
-    process.exit(exitCode);
+    process.exit(numericExitCode);
     return;
   }
 
   server.close(() => {
     console.log("✅ HTTP server closed");
-    process.exit(exitCode);
+    process.exit(numericExitCode);
   });
 
   // Force exit if stuck (PM2 safety)
@@ -79,17 +82,28 @@ function gracefulShutdown(exitCode = 0) {
   }, 10000).unref();
 }
 
-// PM2 / Docker / Ctrl+C signals
-process.on("SIGTERM", () => gracefulShutdown(0));
-process.on("SIGINT", () => gracefulShutdown(0));
+/* ===============================
+   SIGNAL HANDLERS
+================================ */
+// PM2 / Docker / Kubernetes signals
+process.on("SIGTERM", () => {
+  console.log("📡 SIGTERM received");
+  gracefulShutdown(0);
+});
+
+// Ctrl+C signal
+process.on("SIGINT", () => {
+  console.log("📡 SIGINT received");
+  gracefulShutdown(0);
+});
 
 /* ===============================
-   START
+   START SERVER
 ================================ */
 startServer();
 
 /* ===============================
-   LOGGING
+   STARTUP LOGGING
 ================================ */
 function logStartup() {
   console.log("");
@@ -101,7 +115,7 @@ function logStartup() {
   console.log("");
   console.log(`📍 Server URL:        http://${HOST}:${PORT}`);
   console.log(`🌍 Environment:       ${NODE_ENV}`);
-  console.log(`🗄️  Database:          MySQL (AWS RDS)`);
+  console.log(`🗄️  Database:          MySQL (AWS)`);
   console.log(`🔐 Secrets:           AWS Secrets Manager`);
   console.log(`🌐 Frontend URL:      ${process.env.FRONTEND_URL || "Not configured"}`);
   console.log(`📡 Health Check:      http://${HOST}:${PORT}/health`);
@@ -116,7 +130,7 @@ function logStartup() {
   console.log("  • GET    /api/s3");
   console.log("  • POST   /api/mail");
   console.log("");
-  console.log("✅ Server ready to accept requests");
+  console.log("✅ Server ready to accept requests!");
   console.log("");
 
   if (NODE_ENV === "development") {
