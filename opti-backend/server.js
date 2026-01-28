@@ -1,3 +1,5 @@
+"use strict";
+
 require("dotenv").config();
 
 const app = require("./src/app");
@@ -6,32 +8,33 @@ const { connectDB } = require("./src/config/database");
 /* ===============================
    CONFIG
 ================================ */
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 const HOST = process.env.HOST || "0.0.0.0";
 const NODE_ENV = process.env.NODE_ENV || "development";
+
+/* ===============================
+   SERVER STATE
+================================ */
+let server;
+let isShuttingDown = false;
 
 /* ===============================
    GLOBAL ERROR HANDLERS
 ================================ */
 
-// Sync errors
+// Synchronous errors (very rare)
 process.on("uncaughtException", (err) => {
   console.error("💥 UNCAUGHT EXCEPTION");
-  console.error(err);
-  process.exit(1);
+  console.error(err.stack || err);
+  process.exit(1); // must exit immediately
 });
 
 // Async promise errors
 process.on("unhandledRejection", (err) => {
   console.error("💥 UNHANDLED PROMISE REJECTION");
-  console.error(err);
-  shutdown(1);
+  console.error(err.stack || err);
+  gracefulShutdown(1);
 });
-
-/* ===============================
-   SERVER INSTANCE
-================================ */
-let server;
 
 /* ===============================
    START SERVER
@@ -42,12 +45,10 @@ async function startServer() {
     await connectDB();
     console.log("✅ Database connected");
 
-    server = app.listen(PORT, HOST, () => {
-      logStartup();
-    });
+    server = app.listen(PORT, HOST, logStartup);
   } catch (error) {
     console.error("❌ Server startup failed");
-    console.error(error);
+    console.error(error.stack || error);
     process.exit(1);
   }
 }
@@ -55,18 +56,32 @@ async function startServer() {
 /* ===============================
    GRACEFUL SHUTDOWN
 ================================ */
-function shutdown(exitCode = 0) {
-  if (!server) process.exit(exitCode);
+function gracefulShutdown(exitCode = 0) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
 
-  console.log("👋 Shutting down server...");
+  console.log("👋 Graceful shutdown initiated...");
+
+  if (!server) {
+    process.exit(exitCode);
+    return;
+  }
+
   server.close(() => {
     console.log("✅ HTTP server closed");
     process.exit(exitCode);
   });
+
+  // Force exit if stuck (PM2 safety)
+  setTimeout(() => {
+    console.error("⚠️ Forced shutdown after timeout");
+    process.exit(1);
+  }, 10000).unref();
 }
 
-process.on("SIGTERM", shutdown);
-process.on("SIGINT", shutdown);
+// PM2 / Docker / Ctrl+C signals
+process.on("SIGTERM", () => gracefulShutdown(0));
+process.on("SIGINT", () => gracefulShutdown(0));
 
 /* ===============================
    START
