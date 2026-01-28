@@ -415,11 +415,17 @@
 }
 
 .link {
+  background: none;
+  border: none;
+  padding: 0;
   color: #7c88ff;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.2s ease;
   position: relative;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
 }
 
 .link::after {
