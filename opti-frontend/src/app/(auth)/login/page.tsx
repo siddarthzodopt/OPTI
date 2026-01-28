@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./style.module.css";
+import styles from "./login.module.css";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://3.7.98.1:5000/api";
 
@@ -284,15 +284,23 @@ export default function LoginPage() {
 
             {/* Links */}
             <div className={styles.links}>
-              <Link href="/forgot-password" className={styles.link}>
+              <button 
+                type="button"
+                onClick={() => router.push("/forgot-password")}
+                className={styles.link}
+              >
                 Forgot Password?
-              </Link>
+              </button>
               {loginType === "admin" && (
                 <>
                   <span className={styles.separator}>|</span>
-                  <Link href="/register" className={styles.link}>
+                  <button 
+                    type="button"
+                    onClick={() => router.push("/register")}
+                    className={styles.link}
+                  >
                     New Registration
-                  </Link>
+                  </button>
                 </>
               )}
             </div>
