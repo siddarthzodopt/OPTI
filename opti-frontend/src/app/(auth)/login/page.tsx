@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./style.module.css";
 
-// API Configuration
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://3.7.98.1:5000/api";
+
+type LoginType = "user" | "admin";
 
 export default function LoginPage() {
   const router = useRouter();
 
+  const [loginType, setLoginType] = useState<LoginType>("user");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -20,13 +22,11 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
     if (!email.trim() || !password) {
       setError("Please enter both email and password");
       return;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email address");
@@ -37,8 +37,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Call backend login API
-      const response = await fetch(`${API_URL}/auth/user/login`, {
+      // Choose endpoint based on login type
+      const endpoint = loginType === "admin" 
+        ? `${API_URL}/auth/admin/login`
+        : `${API_URL}/auth/user/login`;
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,13 +70,16 @@ export default function LoginPage() {
         localStorage.setItem("opti_user", JSON.stringify(data.data.user));
       }
 
-      // Check if user must change password
-      if (data.data?.mustChangePassword) {
-        // Redirect to password change page
-        router.push("/reset_password");
+      // Redirect based on user type
+      if (loginType === "admin") {
+        router.push("/settings"); // Admin dashboard
       } else {
-        // Redirect to dashboard/chat
-        router.push("/opti-chat");
+        // Check if user must change password
+        if (data.data?.mustChangePassword) {
+          router.push("/reset_password");
+        } else {
+          router.push("/opti-chat"); // User dashboard
+        }
       }
     } catch (err: any) {
       setError(err.message || "Invalid email or password. Please try again.");
@@ -141,9 +148,45 @@ export default function LoginPage() {
       <div className={styles.rightPanel}>
         <div className={styles.loginCard}>
           <h2 className={styles.loginTitle}>LOGIN TO YOUR ACCOUNT</h2>
-          <p className={styles.loginSubtitle}>Enter your credentials to access your account</p>
+          <p className={styles.loginSubtitle}>
+            {loginType === "admin" 
+              ? "Enter your admin credentials" 
+              : "Enter your credentials to access your account"}
+          </p>
 
           <form onSubmit={handleLogin} className={styles.form}>
+            {/* Login Type Toggle */}
+            <div className={styles.loginTypeToggle}>
+              <button
+                type="button"
+                className={`${styles.toggleButton} ${loginType === "user" ? styles.toggleButtonActive : ""}`}
+                onClick={() => {
+                  setLoginType("user");
+                  setError("");
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                User Login
+              </button>
+              <button
+                type="button"
+                className={`${styles.toggleButton} ${loginType === "admin" ? styles.toggleButtonActive : ""}`}
+                onClick={() => {
+                  setLoginType("admin");
+                  setError("");
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 15l-8.5 5.2c-.5.3-1.1-.1-1-7l8.5-13 8.5 13c.1.6-.5 1-.9.8L12 15z"/>
+                  <path d="M17 14h-2m-3 0H9"/>
+                </svg>
+                Admin Login
+              </button>
+            </div>
+
             <div className={styles.inputGroup}>
               <label htmlFor="email" className={styles.label}>
                 Email Address
@@ -157,7 +200,7 @@ export default function LoginPage() {
                   type="email"
                   id="email"
                   className={styles.input}
-                  placeholder="Enter your email"
+                  placeholder={loginType === "admin" ? "Enter admin email" : "Enter your email"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -229,7 +272,7 @@ export default function LoginPage() {
                   Logging in...
                 </>
               ) : (
-                "Login"
+                `Login as ${loginType === "admin" ? "Admin" : "User"}`
               )}
             </button>
 
@@ -237,10 +280,14 @@ export default function LoginPage() {
               <Link href="/forgot-password" className={styles.link}>
                 Forgot Password?
               </Link>
-              <span className={styles.separator}>|</span>
-              <Link href="/admin" className={styles.link}>
-                Admin Login
-              </Link>
+              {loginType === "admin" && (
+                <>
+                  <span className={styles.separator}>|</span>
+                  <Link href="/register" className={styles.link}>
+                    Register as Admin
+                  </Link>
+                </>
+              )}
             </div>
           </form>
         </div>
