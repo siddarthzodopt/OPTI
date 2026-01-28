@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CONFIG, type LoginType } from "@/config";
 import styles from "./login.module.css";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://3.7.98.1:5000/api";
+
+type LoginType = "user" | "admin";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,6 +19,11 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -24,7 +32,7 @@ export default function LoginPage() {
       return;
     }
 
-    if (!CONFIG.validators.email(email)) {
+    if (!validateEmail(email)) {
       setError("Please enter a valid email address");
       return;
     }
@@ -34,8 +42,8 @@ export default function LoginPage() {
 
     try {
       const endpoint = loginType === "admin" 
-        ? CONFIG.api.buildUrl("auth/admin/login")
-        : CONFIG.api.buildUrl("auth/user/login");
+        ? `${API_URL}/auth/admin/login`
+        : `${API_URL}/auth/user/login`;
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -54,23 +62,25 @@ export default function LoginPage() {
         throw new Error(data.message || "Login failed");
       }
 
+      // Store tokens in localStorage
       if (data.data?.token) {
-        localStorage.setItem(CONFIG.storage.authToken, data.data.token);
+        localStorage.setItem("opti_auth_token", data.data.token);
       }
       if (data.data?.refreshToken) {
-        localStorage.setItem(CONFIG.storage.refreshToken, data.data.refreshToken);
+        localStorage.setItem("opti_refresh_token", data.data.refreshToken);
       }
       if (data.data?.user) {
-        localStorage.setItem(CONFIG.storage.userData, JSON.stringify(data.data.user));
+        localStorage.setItem("opti_user", JSON.stringify(data.data.user));
       }
 
+      // Redirect based on user type and password status
       if (loginType === "admin") {
-        router.push(CONFIG.routes.adminDashboard);
+        router.push("/admin");
       } else {
         if (data.data?.mustChangePassword) {
-          router.push(CONFIG.routes.changePassword);
+          router.push("/change-password");
         } else {
-          router.push(CONFIG.routes.userDashboard);
+          router.push("/opti-chat");
         }
       }
     } catch (err: any) {
@@ -275,15 +285,13 @@ export default function LoginPage() {
 
             {/* Links */}
             <div className={styles.links}>
-              {CONFIG.features.passwordReset && (
-                <Link href={CONFIG.routes.forgotPassword} className={styles.link}>
-                  Forgot Password?
-                </Link>
-              )}
-              {loginType === "admin" && CONFIG.features.registration && (
+              <Link href="/forgot-password" className={styles.link}>
+                Forgot Password?
+              </Link>
+              {loginType === "admin" && (
                 <>
                   <span className={styles.separator}>|</span>
-                  <Link href={CONFIG.routes.register} className={styles.link}>
+                  <Link href="/register" className={styles.link}>
                     New Registration
                   </Link>
                 </>
