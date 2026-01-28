@@ -9,8 +9,16 @@ const { connectDB } = require("./src/config/database");
    CONFIGURATION
 ================================ */
 const PORT = Number(process.env.PORT) || 5000;
-const HOST = process.env.HOST || "0.0.0.0";
+
+/**
+ * IMPORTANT:
+ * - Always bind to 0.0.0.0 on EC2 / Docker / PM2
+ * - Never bind to public IP directly
+ */
+const HOST = "0.0.0.0";
+
 const NODE_ENV = process.env.NODE_ENV || "development";
+const FRONTEND_URL = process.env.FRONTEND_URL || "Not configured";
 
 /* ===============================
    SERVER STATE
@@ -26,7 +34,7 @@ let isShuttingDown = false;
 process.on("uncaughtException", (err) => {
   console.error("💥 UNCAUGHT EXCEPTION");
   console.error(err.stack || err);
-  process.exit(1); // Exit code must be a number
+  process.exit(1);
 });
 
 // Async promise errors
@@ -57,41 +65,38 @@ async function startServer() {
    GRACEFUL SHUTDOWN
 ================================ */
 function gracefulShutdown(exitCode = 0) {
-  // Ensure exitCode is a number
-  const numericExitCode = typeof exitCode === 'number' ? exitCode : 0;
-  
+  const code = typeof exitCode === "number" ? exitCode : 0;
+
   if (isShuttingDown) return;
   isShuttingDown = true;
 
   console.log("👋 Graceful shutdown initiated...");
 
   if (!server) {
-    process.exit(numericExitCode);
+    process.exit(code);
     return;
   }
 
   server.close(() => {
     console.log("✅ HTTP server closed");
-    process.exit(numericExitCode);
+    process.exit(code);
   });
 
-  // Force exit if stuck (PM2 safety)
+  // PM2 safety net
   setTimeout(() => {
     console.error("⚠️ Forced shutdown after timeout");
     process.exit(1);
-  }, 10000).unref();
+  }, 10_000).unref();
 }
 
 /* ===============================
    SIGNAL HANDLERS
 ================================ */
-// PM2 / Docker / Kubernetes signals
 process.on("SIGTERM", () => {
   console.log("📡 SIGTERM received");
   gracefulShutdown(0);
 });
 
-// Ctrl+C signal
 process.on("SIGINT", () => {
   console.log("📡 SIGINT received");
   gracefulShutdown(0);
@@ -106,6 +111,11 @@ startServer();
    STARTUP LOGGING
 ================================ */
 function logStartup() {
+  const publicHost =
+    process.env.PUBLIC_HOST ||
+    process.env.EC2_PUBLIC_IP ||
+    "your-ec2-public-ip";
+
   console.log("");
   console.log("╔══════════════════════════════════════════════════╗");
   console.log("║                                                  ║");
@@ -113,19 +123,22 @@ function logStartup() {
   console.log("║                                                  ║");
   console.log("╚══════════════════════════════════════════════════╝");
   console.log("");
-  console.log(`📍 Server URL:        http://${HOST}:${PORT}`);
-  console.log(`🌍 Environment:       ${NODE_ENV}`);
-  console.log(`🗄️  Database:          MySQL (AWS)`);
-  console.log(`🔐 Secrets:           AWS Secrets Manager`);
-  console.log(`🌐 Frontend URL:      ${process.env.FRONTEND_URL || "Not configured"}`);
-  console.log(`📡 Health Check:      http://${HOST}:${PORT}/health`);
+  console.log(`📍 Bind Address:     http://${HOST}:${PORT}`);
+  console.log(`🌐 Public URL:       http://${publicHost}:${PORT}`);
+  console.log(`🌍 Environment:      ${NODE_ENV}`);
+  console.log(`🗄️  Database:         MySQL (AWS RDS)`);
+  console.log(`🔐 Secrets:          AWS Secrets Manager`);
+  console.log(`🎨 Frontend URL:     ${FRONTEND_URL}`);
+  console.log(`📡 Health Check:     http://${publicHost}:${PORT}/health`);
   console.log("");
   console.log("Available API Routes:");
   console.log("  • POST   /api/auth/admin/login");
   console.log("  • POST   /api/auth/user/login");
   console.log("  • POST   /api/admin/register");
-  console.log("  • GET    /api/users");
-  console.log("  • POST   /api/users");
+  console.log("  • GET    /api/admin/profile");
+  console.log("  • PUT    /api/admin/profile");
+  console.log("  • GET    /api/admin/company-plan");
+  console.log("  • PUT    /api/admin/company-plan");
   console.log("  • POST   /api/chat");
   console.log("  • GET    /api/s3");
   console.log("  • POST   /api/mail");
@@ -148,3 +161,4 @@ function logStartup() {
 }
 
 module.exports = app;
+
