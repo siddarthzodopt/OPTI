@@ -1,197 +1,147 @@
 .container {
   min-height: 100vh;
-  height: 100vh;
-  background: #000;
   display: flex;
-  flex-direction: column;
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.container::-webkit-scrollbar {
-  display: none;
-}
-
-/* ================= HEADER ================= */
-.header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 480px;
   position: relative;
-  z-index: 10;
+  animation: slideUp 0.4s ease-out;
 }
 
-/* ================= OPTI BRANDING - TOP LEFT ================= */
-.brandingCorner {
-  flex-shrink: 0;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.brandName {
-  font-size: 3rem;
-  font-weight: 900;
-  margin: 0;
-  letter-spacing: -0.05em;
-  line-height: 1;
-  background: linear-gradient(
-    135deg,
-    #d8dcff 0%,
-    #7c88ff 20%,
-    #5865f2 40%,
-    #7c88ff 60%,
-    #d8dcff 80%,
-    #7c88ff 100%
-  );
-  background-size: 300% 300%;
+.logoSection {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradientMove 8s ease infinite;
+  margin: 0;
+  letter-spacing: -1px;
 }
 
-@keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-  }
-  25% {
-    background-position: 50% 100%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  75% {
-    background-position: 50% 0%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* ================= BACK BUTTON - TOP RIGHT ================= */
 .backButton {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.75rem;
-  font-size: 0.95rem;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: inherit;
-  flex-shrink: 0;
-}
-
-.backButton svg {
-  width: 20px;
-  height: 20px;
+  padding: 0.5rem 0;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s ease;
 }
 
 .backButton:hover {
-  background: rgba(124, 136, 255, 0.2);
-  border-color: #7c88ff;
-  transform: translateX(-3px);
+  color: #667eea;
 }
 
-/* ================= CONTENT ================= */
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  position: relative;
-  z-index: 1;
-  max-width: 520px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.card {
-  width: 100%;
-  background: #fff;
-  border-radius: 2rem;
-  padding: 3rem;
-  box-shadow: 0 20px 60px rgba(124, 136, 255, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  background: linear-gradient(90deg, #7c88ff 0%, #5865f2 100%);
-}
-
-/* ================= ICON ================= */
-.iconContainer {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1.5rem;
+.backButton svg {
+  width: 18px;
+  height: 18px;
 }
 
 .iconCircle {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #7c88ff, #5865f2);
-  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  box-shadow: 0 10px 30px rgba(124, 136, 255, 0.3);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
 }
 
 .iconCircle svg {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
+  color: white;
 }
 
 .successCircle {
-  background: linear-gradient(135deg, #4caf50, #388e3c);
-  box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
-/* ================= TYPOGRAPHY ================= */
 .title {
   font-size: 1.75rem;
-  font-weight: 800;
-  text-align: center;
+  font-weight: 700;
+  color: #1e293b;
   margin: 0 0 0.5rem 0;
-  color: #1a1a1a;
-  letter-spacing: -0.5px;
+  text-align: center;
 }
 
 .subtitle {
-  font-size: 0.95rem;
-  color: #666;
-  text-align: center;
+  color: #64748b;
+  font-size: 0.9375rem;
   margin: 0 0 2rem 0;
   line-height: 1.5;
+  text-align: center;
 }
 
-.subtitle strong {
-  color: #7c88ff;
-  font-weight: 600;
-}
-
-/* ================= FORM ================= */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
+}
+
+.userTypeToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 0.375rem;
+  background: #f1f5f9;
+  border-radius: 12px;
+}
+
+.toggleButton {
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggleButton:hover {
+  background: rgba(100, 116, 139, 0.1);
+}
+
+.toggleButton.active {
+  background: white;
+  color: #667eea;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .inputGroup {
@@ -201,14 +151,9 @@
 }
 
 .label {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #333;
-  margin-left: 0.25rem;
-}
-
-.required {
-  color: #f44336;
+  color: #334155;
 }
 
 .inputWrapper {
@@ -222,43 +167,41 @@
   left: 1rem;
   width: 20px;
   height: 20px;
-  color: #999;
+  color: #94a3b8;
   pointer-events: none;
-  z-index: 1;
 }
 
 .input {
   width: 100%;
-  padding: 0.95rem 1rem 0.95rem 3rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 0.75rem;
-  font-size: 0.95rem;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  font-size: 0.9375rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
   outline: none;
   transition: all 0.2s ease;
-  background: #fff;
-  color: #333;
   font-family: inherit;
 }
 
 .input::placeholder {
-  color: #aaa;
+  color: #94a3b8;
 }
 
 .input:focus {
-  border-color: #7c88ff;
-  box-shadow: 0 0 0 4px rgba(124, 136, 255, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .input:disabled {
-  background: #f5f5f5;
+  background-color: #f8fafc;
   cursor: not-allowed;
-  opacity: 0.6;
 }
 
-.hint {
-  font-size: 0.8rem;
-  color: #999;
-  margin-left: 0.25rem;
+.otpInput {
+  text-align: center;
+  font-size: 1.5rem;
+  letter-spacing: 0.5rem;
+  font-weight: 600;
+  padding-left: 1rem;
 }
 
 .togglePassword {
@@ -266,22 +209,14 @@
   right: 1rem;
   background: none;
   border: none;
-  color: #999;
   cursor: pointer;
   padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s ease;
+  font-size: 1.25rem;
+  transition: opacity 0.2s ease;
 }
 
-.togglePassword svg {
-  width: 20px;
-  height: 20px;
-}
-
-.togglePassword:hover:not(:disabled) {
-  color: #7c88ff;
+.togglePassword:hover {
+  opacity: 0.7;
 }
 
 .togglePassword:disabled {
@@ -289,124 +224,92 @@
   opacity: 0.5;
 }
 
-/* ================= MESSAGES ================= */
-.errorMessage {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  background: rgba(244, 67, 54, 0.1);
-  border: 1px solid rgba(244, 67, 54, 0.3);
-  border-radius: 0.75rem;
-  color: #d32f2f;
-  font-size: 0.875rem;
-  font-weight: 500;
-  animation: shake 0.4s ease;
+.passwordHints {
+  font-size: 0.8125rem;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
 }
 
-.errorMessage svg {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
+.errorMessage {
+  padding: 0.875rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #dc2626;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .successMessage {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
   padding: 0.875rem 1rem;
-  background: rgba(76, 175, 80, 0.1);
-  border: 1px solid rgba(76, 175, 80, 0.3);
-  border-radius: 0.75rem;
-  color: #388e3c;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  color: #16a34a;
   font-size: 0.875rem;
   font-weight: 500;
 }
 
-.successMessage svg {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
-
-.successBox {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: rgba(76, 175, 80, 0.1);
-  border: 2px solid rgba(76, 175, 80, 0.3);
-  border-radius: 1rem;
-  margin: 1rem 0;
-}
-
-.successIcon {
-  width: 32px;
-  height: 32px;
-  color: #4caf50;
-  flex-shrink: 0;
-}
-
-.successBox p {
-  margin: 0;
-  color: #388e3c;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.successBox strong {
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-/* ================= BUTTONS ================= */
-.primaryButton {
+.submitButton {
   width: 100%;
   padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   border: none;
-  border-radius: 0.75rem;
+  border-radius: 10px;
   font-size: 1rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #7c88ff, #5865f2);
-  color: #fff;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(124, 136, 255, 0.3);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  margin-top: 0.25rem;
-  font-family: inherit;
-  letter-spacing: 0.5px;
+  gap: 0.5rem;
 }
 
-.primaryButton:hover:not(:disabled) {
+.submitButton:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(124, 136, 255, 0.4);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
 }
 
-.primaryButton:active:not(:disabled) {
+.submitButton:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.primaryButton:disabled {
+.submitButton:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-  transform: none;
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.linkButton:hover:not(:disabled) {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.linkButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .spinner {
   width: 18px;
   height: 18px;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border-top-color: white;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -415,124 +318,46 @@
   to { transform: rotate(360deg); }
 }
 
-/* ================= LINKS ================= */
-.links {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1rem;
-  font-size: 0.9rem;
+.successBox {
+  padding: 1.25rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  color: #16a34a;
+  text-align: center;
+  font-size: 0.9375rem;
+  margin: 1rem 0;
 }
 
-.linkButton {
-  background: none;
-  border: none;
-  color: #7c88ff;
-  text-decoration: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  font-size: 0.9rem;
-  padding: 0;
-  font-family: inherit;
-}
-
-.linkButton::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: #7c88ff;
-  transition: width 0.3s ease;
-}
-
-.linkButton:hover:not(:disabled) {
-  color: #5865f2;
-}
-
-.linkButton:hover:not(:disabled)::after {
-  width: 100%;
-}
-
-.linkButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ================= PROGRESS INDICATOR ================= */
 .progressIndicator {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  margin-top: 2rem;
 }
 
-.progressStep {
-  width: 40px;
-  height: 40px;
+.progressDot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.4);
-  font-weight: 700;
-  font-size: 0.95rem;
+  background: #e2e8f0;
   transition: all 0.3s ease;
 }
 
-.progressStepActive {
-  background: linear-gradient(135deg, #7c88ff, #5865f2);
-  border-color: #7c88ff;
-  color: #fff;
-  box-shadow: 0 4px 15px rgba(124, 136, 255, 0.4);
+.progressDot.active {
+  background: #667eea;
+  transform: scale(1.25);
 }
 
-.progressLine {
-  width: 60px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.progressLineActive {
-  background: linear-gradient(90deg, #7c88ff, #5865f2);
-}
-
-/* ================= RESPONSIVE ================= */
-
-@media (max-width: 768px) {
-  .container {
-    padding: 1.5rem;
-    overflow-y: auto;
-    height: auto;
-  }
-
-  .header {
-    margin-bottom: 1.5rem;
-  }
-
-  .brandName {
-    font-size: 2.5rem;
-  }
-
-  .backButton {
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-  }
-
-  .backButton svg {
-    width: 18px;
-    height: 18px;
-  }
-
+/* Responsive Design */
+@media (max-width: 640px) {
   .card {
-    padding: 2.5rem 2rem;
+    padding: 2rem 1.5rem;
+  }
+
+  .logo {
+    font-size: 1.75rem;
   }
 
   .title {
@@ -543,94 +368,13 @@
     font-size: 0.875rem;
   }
 
-  .progressLine {
-    width: 40px;
-  }
-
-  .progressStep {
-    width: 36px;
-    height: 36px;
-    font-size: 0.875rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 1rem;
-  }
-
-  .header {
-    margin-bottom: 1rem;
-  }
-
-  .brandName {
-    font-size: 2rem;
-  }
-
-  .backButton {
-    padding: 0.5rem 0.875rem;
-    font-size: 0.8rem;
-  }
-
-  .backButton span {
-    display: none;
-  }
-
-  .backButton svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .card {
-    padding: 2rem 1.5rem;
-    border-radius: 1.5rem;
-  }
-
   .iconCircle {
-    width: 70px;
-    height: 70px;
+    width: 56px;
+    height: 56px;
   }
 
   .iconCircle svg {
-    width: 35px;
-    height: 35px;
-  }
-
-  .title {
-    font-size: 1.35rem;
-  }
-
-  .subtitle {
-    font-size: 0.85rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .input {
-    padding: 0.85rem 0.875rem 0.85rem 2.75rem;
-    font-size: 0.9rem;
-  }
-
-  .primaryButton {
-    padding: 0.95rem;
-    font-size: 0.95rem;
-  }
-
-  .progressLine {
-    width: 30px;
-  }
-
-  .progressStep {
-    width: 32px;
-    height: 32px;
-    font-size: 0.8rem;
-  }
-}
-
-/* ================= REDUCED MOTION ================= */
-@media (prefers-reduced-motion: reduce) {
-  .brandName {
-    animation: none;
-    background: linear-gradient(135deg, #d8dcff 0%, #7c88ff 50%, #5865f2 100%);
-    background-size: 100% 100%;
+    width: 28px;
+    height: 28px;
   }
 }
