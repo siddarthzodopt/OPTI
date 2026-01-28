@@ -3,11 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import styles from "./style.module.css";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL!;
-
-type LoginType = "user" | "admin";
+import { CONFIG, type LoginType } from "@/config";
+import styles from "./login.module.css";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,8 +24,7 @@ export default function LoginPage() {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!CONFIG.validators.email(email)) {
       setError("Please enter a valid email address");
       return;
     }
@@ -37,10 +33,9 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Choose endpoint based on login type
       const endpoint = loginType === "admin" 
-        ? `${API_URL}/auth/admin/login`
-        : `${API_URL}/auth/user/login`;
+        ? CONFIG.api.buildUrl("auth/admin/login")
+        : CONFIG.api.buildUrl("auth/user/login");
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -59,26 +54,23 @@ export default function LoginPage() {
         throw new Error(data.message || "Login failed");
       }
 
-      // Store tokens in localStorage
       if (data.data?.token) {
-        localStorage.setItem("opti_auth_token", data.data.token);
+        localStorage.setItem(CONFIG.storage.authToken, data.data.token);
       }
       if (data.data?.refreshToken) {
-        localStorage.setItem("opti_refresh_token", data.data.refreshToken);
+        localStorage.setItem(CONFIG.storage.refreshToken, data.data.refreshToken);
       }
       if (data.data?.user) {
-        localStorage.setItem("opti_user", JSON.stringify(data.data.user));
+        localStorage.setItem(CONFIG.storage.userData, JSON.stringify(data.data.user));
       }
 
-      // Redirect based on user type
       if (loginType === "admin") {
-        router.push("/admin"); // Admin dashboard
+        router.push(CONFIG.routes.adminDashboard);
       } else {
-        // Check if user must change password
         if (data.data?.mustChangePassword) {
-          router.push("/reset_password");
+          router.push(CONFIG.routes.changePassword);
         } else {
-          router.push("/opti-chat"); // User dashboard
+          router.push(CONFIG.routes.userDashboard);
         }
       }
     } catch (err: any) {
@@ -105,7 +97,7 @@ export default function LoginPage() {
 
         <div className={styles.socialLinks}>
           <a 
-            href="https://wa.me/your-number" 
+            href="https://wa.me/" 
             target="_blank" 
             rel="noopener noreferrer"
             className={styles.socialIcon}
@@ -116,7 +108,7 @@ export default function LoginPage() {
             </svg>
           </a>
           <a 
-            href="https://instagram.com/your-profile" 
+            href="https://instagram.com/" 
             target="_blank" 
             rel="noopener noreferrer"
             className={styles.socialIcon}
@@ -127,7 +119,7 @@ export default function LoginPage() {
             </svg>
           </a>
           <a 
-            href="https://facebook.com/your-page" 
+            href="https://facebook.com/" 
             target="_blank" 
             rel="noopener noreferrer"
             className={styles.socialIcon}
@@ -140,17 +132,17 @@ export default function LoginPage() {
         </div>
 
         <div className={styles.footer}>
-          <p>&copy; 2026 OPTI. All rights reserved.</p>
+          <p>© 2026 OPTI. All rights reserved.</p>
         </div>
       </div>
 
-      {/* Right Panel - Login Form */}
+      {/* Right Panel */}
       <div className={styles.rightPanel}>
         <div className={styles.loginCard}>
           <h2 className={styles.loginTitle}>LOGIN TO YOUR ACCOUNT</h2>
           <p className={styles.loginSubtitle}>
             {loginType === "admin" 
-              ? "Enter your admin credentials" 
+              ? "Enter your admin credentials to access your account" 
               : "Enter your credentials to access your account"}
           </p>
 
@@ -180,13 +172,15 @@ export default function LoginPage() {
                 }}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 15l-8.5 5.2c-.5.3-1.1-.1-1-7l8.5-13 8.5 13c.1.6-.5 1-.9.8L12 15z"/>
-                  <path d="M17 14h-2m-3 0H9"/>
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
                 </svg>
                 Admin Login
               </button>
             </div>
 
+            {/* Email Input */}
             <div className={styles.inputGroup}>
               <label htmlFor="email" className={styles.label}>
                 Email Address
@@ -200,7 +194,7 @@ export default function LoginPage() {
                   type="email"
                   id="email"
                   className={styles.input}
-                  placeholder={loginType === "admin" ? "Enter admin email" : "Enter your email"}
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -210,6 +204,7 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {/* Password Input */}
             <div className={styles.inputGroup}>
               <label htmlFor="password" className={styles.label}>
                 Password
@@ -252,6 +247,7 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {/* Error Message */}
             {error && (
               <div className={styles.errorMessage}>
                 <svg viewBox="0 0 24 24" fill="currentColor">
@@ -261,6 +257,7 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* Submit Button */}
             <button 
               type="submit" 
               className={styles.loginButton}
@@ -272,19 +269,22 @@ export default function LoginPage() {
                   Logging in...
                 </>
               ) : (
-                `Login as ${loginType === "admin" ? "Admin" : "User"}`
+                "Login"
               )}
             </button>
 
+            {/* Links */}
             <div className={styles.links}>
-              <Link href="/forgot-password" className={styles.link}>
-                Forgot Password?
-              </Link>
-              {loginType === "admin" && (
+              {CONFIG.features.passwordReset && (
+                <Link href={CONFIG.routes.forgotPassword} className={styles.link}>
+                  Forgot Password?
+                </Link>
+              )}
+              {loginType === "admin" && CONFIG.features.registration && (
                 <>
                   <span className={styles.separator}>|</span>
-                  <Link href="/register" className={styles.link}>
-                    Register as Admin
+                  <Link href={CONFIG.routes.register} className={styles.link}>
+                    New Registration
                   </Link>
                 </>
               )}
